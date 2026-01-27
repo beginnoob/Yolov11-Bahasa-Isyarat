@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deteksi Bahasa Isyarat - Dengan Riwayat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2c3e50;
+            --text-light: #7f8c8d;
+            --bg-light: #f8f9fa;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning-bg: #fff3cd;
+            --warning-text: #856404;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(180deg, #ffffff 0%, #ecf3f9 100%);
+            color: var(--secondary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            background: #ffffff;
+            padding: 40px 30px 60px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(52, 152, 219, 0.15);
+            animation: fadeIn 0.8s ease;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .header a { display: inline-block; margin-bottom: 25px; color: var(--primary); text-decoration: none; font-weight: 600; transition: color 0.3s; }
+        .header a:hover { color: var(--primary-dark); }
+        .header h1 { font-size: 2.4rem; color: var(--secondary); font-weight: 700; margin-bottom: 5px; }
+        .header p { color: var(--text-light); font-size: 1.1rem; margin-bottom: 20px; }
+
+        /* WARNING BOX ALERT */
+        .warning-alert {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid #ffeeba;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .warning-alert svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+        /* Video Container */
+        .video-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
+        .video-container { position: relative; width: 100%; background-color: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); z-index: 1; }
+        video, canvas { display: block; width: 100%; height: auto; }
+        canvas { position: absolute; top: 0; left: 0; }
+        #fpsDisplay { position: absolute; top: 15px; right: 15px; background-color: rgba(0, 0, 0, 0.6); color: #ffffff; padding: 5px 12px; border-radius: 20px; font-size: 0.9em; z-index: 2; }
+
+        /* Gallery Button */
+        .gallery-btn {
+            position: absolute; top: 50%; right: -25px; transform: translateY(-50%);
+            width: 50px; height: 50px; border-radius: 50%; background-color: var(--primary); color: white;
+            border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; z-index: 10;
+        }
+        .gallery-btn:hover { background-color: var(--primary-dark); transform: translateY(-50%) scale(1.1); }
+        .gallery-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+        /* Controls */
+        .controls { margin: 30px 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .btn { padding: 12px 30px; font-size: 1rem; font-weight: 600; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3); }
+        #toggleCamButton { background-color: var(--success); color: white; }
+        #toggleCamButton.active { background-color: var(--danger); }
+        #resetSentenceButton { background-color: var(--secondary); color: white; }
+        #switchCamButton { background-color: var(--primary); color: white; display: none; }
+        
+        /* New Button for History */
+        #clearHistoryButton { background-color: #e74c3c; color: white; }
+
+        /* Sentence Box (Active) */
+        .sentence-box {
+            background-color: var(--bg-light);
+            padding: 25px;
+            border-radius: 15px;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #e1e9ef;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .sentence-box.active-detection {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.1);
+        }
+        .sentence-box h2 { font-size: 1.8rem; font-weight: 600; color: var(--secondary); }
+        .sentence-box h2.placeholder { color: #b0bec5; font-weight: 400; }
+
+        /* HISTORY SECTION (NEW) */
+        .history-wrapper {
+            background-color: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: left;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-title {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-weight: 600;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .history-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            background-color: var(--bg-light);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            color: var(--secondary);
+            animation: slideDown 0.4s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .history-item::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: 20px; }
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-content { background: white; width: 100%; max-width: 800px; max-height: 90vh; border-radius: 20px; padding: 30px; overflow-y: auto; position: relative; transform: scale(0.8); transition: transform 0.3s ease; }
+        .modal-overlay.show .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { font-size: 1.5rem; color: var(--secondary); }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); }
+        .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .gallery-item { position: relative; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); aspect-ratio: 1 / 1; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .gallery-item:hover img { transform: scale(1.05); }
+        .gallery-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.6); color: white; padding: 8px; text-align: center; font-size: 0.9rem; font-weight: 600; }
+
+        @media (max-width: 900px) { .gallery-btn { right: 10px; top: 10px; transform: none; position: absolute; } }
+        @media (max-width: 768px) { .main-wrapper { padding: 25px 20px; } .header h1 { font-size: 2rem; } .sentence-box h2 { font-size: 1.4rem; } .btn { padding: 10px 20px; font-size: 0.9rem; } .gallery-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 480px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } .warning-alert { font-size: 0.85rem; text-align: left; } .modal-content { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <header class="header">
+            <a href="/">&larr; Kembali ke Beranda</a>
+            <h1>Deteksi Bahasa Isyarat</h1>
+            <p>Arahkan tangan Anda ke kamera. Setiap 3 kata akan disimpan ke riwayat.</p>
+        </header>
+
+        <div class="warning-alert">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <span><strong>PENTING:</strong> Pastikan pencahayaan cukup terang agar deteksi akurat.</span>
+        </div>
+
+        <main>
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <div id="fpsDisplay">Kamera nonaktif</div>
+                    <video id="videoElement" autoplay playsinline></video>
+                    <canvas id="canvasElement"></canvas>
+                </div>
+                
+                <button id="openGalleryBtn" class="gallery-btn" title="Lihat Daftar Isyarat">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="controls">
+                <button id="toggleCamButton" class="btn">Buka Kamera</button>
+                <button id="switchCamButton" class="btn">Ganti Kamera</button>
+                <button id="resetSentenceButton" class="btn">Reset Kata</button>
+            </div>
+
+            <div class="sentence-box" id="activeSentenceBox">
+                <h2 id="sentenceDisplay" class="placeholder">- Menunggu Isyarat -</h2>
+            </div>
+
+            <div class="history-wrapper">
+                <div class="history-title">Riwayat Kalimat (Tersimpan otomatis setelah 3 kata)</div>
+                <div class="history-list" id="historyList">
+                    </div>
+                <div style="margin-top: 15px; text-align: center;">
+                    <button id="clearHistoryButton" class="btn" style="padding: 8px 20px; font-size: 0.9rem;">Hapus Riwayat</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="galleryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Daftar Isyarat (12 Kata)</h3>
+                <button class="close-modal" id="closeGalleryBtn">&times;</button>
+            </div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvasElement');
+        const ctx = canvas.getContext('2d');
+        const toggleCamButton = document.getElementById('toggleCamButton');
+        const resetSentenceButton = document.getElementById('resetSentenceButton');
+        const clearHistoryButton = document.getElementById('clearHistoryButton'); // Tombol baru
+        const fpsDisplay = document.getElementById('fpsDisplay');
+        const sentenceDisplay = document.getElementById('sentenceDisplay');
+        const activeSentenceBox = document.getElementById('activeSentenceBox');
+        const historyList = document.getElementById('historyList'); // Wadah riwayat
+        const switchCamButton = document.getElementById('switchCamButton');
+
+        let availableCameras = [];
+        let currentCameraIndex = 0;
+        let isCameraOn = false;
+        let stream = null;
+        let animationFrameId = null;
+        
+        let currentSentence = [];
+        let lastStableWord = null;
+        let detectionStreak = 0;
+        let lastDetectedWord = null;
+        let sentenceResetTimeout = null;
+        
+        const CONFIRMATION_THRESHOLD = 5; 
+        const RESET_TIMEOUT_MS = 2000; // Diperpanjang sedikit agar tidak mudah hilang
+
+        toggleCamButton.addEventListener('click', () => { isCameraOn ? stopCamera() : startCamera(); });
+        resetSentenceButton.addEventListener('click', resetActiveSentence);
+        switchCamButton.addEventListener('click', switchCamera);
+        clearHistoryButton.addEventListener('click', clearHistory);
+
+        async function populateCameraList() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                availableCameras = devices.filter(device => device.kind === 'videoinput');
+                if (availableCameras.length > 1) switchCamButton.style.display = 'inline-block';
+            } catch (err) { console.error("Gagal mendeteksi kamera:", err); }
+        }
+
+        function switchCamera() {
+            if (!isCameraOn || availableCameras.length <= 1) return;
+            currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+            stopCamera();
+            setTimeout(startCamera, 150);
+        }
+
+        async function startCamera() {
+            if (availableCameras.length === 0) return alert("Tidak ada kamera terdeteksi.");
+            try {
+                const constraints = { video: { deviceId: { exact: availableCameras[currentCameraIndex].deviceId } } };
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    isCameraOn = true;
+                    toggleCamButton.textContent = 'Tutup Kamera';
+                    toggleCamButton.classList.add('active');
+                    resetActiveSentence();
+                    detectionLoop();
+                };
+            } catch (err) { alert("Tidak dapat mengakses kamera."); console.error(err); }
+        }
+
+        function stopCamera() {
+            if (stream) stream.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+            isCameraOn = false;
+            toggleCamButton.textContent = 'Buka Kamera';
+            toggleCamButton.classList.remove('active');
+            fpsDisplay.textContent = 'Kamera nonaktif';
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            resetActiveSentence();
+        }
+
+        populateCameraList();
+
+        async function detectionLoop() {
+            if (!isCameraOn) return;
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+            if (videoWidth === 0 || videoHeight === 0) { animationFrameId = requestAnimationFrame(detectionLoop); return; }
+            if (canvas.width !== videoWidth || canvas.height !== videoHeight) { canvas.width = videoWidth; canvas.height = videoHeight; }
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = videoWidth;
+            tempCanvas.height = videoHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+            const imageData = tempCanvas.toDataURL('image/jpeg');
+            try {
+                const response = await fetch('/detect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: imageData }) });
+                if (!response.ok) throw new Error(response.statusText);
+                const detections = await response.json();
+                drawDetections(detections);
+                const topDetection = detections.length > 0 ? detections.reduce((p, c) => (p.score > c.score) ? p : c) : null;
+                updateSentence(topDetection);
+            } catch (error) {
+                console.error("Error:", error);
+                updateSentence(null);
+            }
+            updateFPS();
+            animationFrameId = requestAnimationFrame(detectionLoop);
+        }
+
+        function updateSentence(topDetection) {
+            const detectedWord = topDetection ? topDetection.class_name.split(' ')[0] : null;
+
+            // Jika tidak ada deteksi, biarkan timeout berjalan untuk reset
+            if (!detectedWord) {
+                if (!sentenceResetTimeout) sentenceResetTimeout = setTimeout(resetActiveSentence, RESET_TIMEOUT_MS);
+                detectionStreak = 0; 
+                lastDetectedWord = null; 
+                return;
+            }
+
+            // Jika ada deteksi, batalkan timeout reset
+            clearTimeout(sentenceResetTimeout);
+            sentenceResetTimeout = null;
+
+            if (detectedWord === lastDetectedWord) {
+                detectionStreak++;
+            } else { 
+                detectionStreak = 0; 
+                lastDetectedWord = detectedWord; 
+            }
+
+            // Jika deteksi stabil
+            if (detectionStreak >= CONFIRMATION_THRESHOLD) {
+                if (detectedWord !== lastStableWord) {
+                    
+                    // Tambahkan kata ke kalimat saat ini
+                    currentSentence.push(detectedWord);
+                    lastStableWord = detectedWord;
+                    
+                    // Efek visual kotak aktif
+                    activeSentenceBox.classList.add('active-detection');
+                    setTimeout(() => activeSentenceBox.classList.remove('active-detection'), 200);
+
+                    // Tampilkan kalimat saat ini
+                    displayCurrentSentence();
+
+                    // --- LOGIKA UTAMA: CEK APAKAH SUDAH 3 KATA ---
+                    if (currentSentence.length >= 3) {
+                        saveToHistory(currentSentence.join(' ')); // Simpan ke riwayat
+                        setTimeout(() => {
+                            resetActiveSentence(); // Reset kotak utama untuk kalimat baru
+                        }, 800); // Beri jeda sedikit agar user sempat lihat 3 kata penuh
+                    }
+                }
+            }
+        }
+
+        // Fungsi menyimpan ke riwayat (Turun ke bawah)
+        function saveToHistory(sentenceText) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.textContent = sentenceText.toLowerCase();
+            
+            // Tambahkan di paling atas daftar
+            historyList.insertBefore(item, historyList.firstChild);
+        }
+
+        // Fungsi membersihkan riwayat
+        function clearHistory() {
+            if(confirm("Hapus semua riwayat percakapan?")) {
+                historyList.innerHTML = '';
+            }
+        }
+
+        function resetActiveSentence() { 
+            currentSentence = []; 
+            lastStableWord = null; 
+            detectionStreak = 0; 
+            clearTimeout(sentenceResetTimeout); 
+            sentenceResetTimeout = null; 
+            displayCurrentSentence(); 
+        }
+
+        function displayCurrentSentence() {
+            if (currentSentence.length > 0) {
+                sentenceDisplay.textContent = currentSentence.join(' ').toLowerCase();
+                sentenceDisplay.classList.remove('placeholder');
+            } else {
+                sentenceDisplay.textContent = isCameraOn ? '- Menunggu Isyarat -' : '- Kamera nonaktif -';
+                sentenceDisplay.classList.add('placeholder');
+            }
+        }
+
+        let frameCount = 0; let lastTime = performance.now();
+        function updateFPS() {
+            const now = performance.now(); const delta = now - lastTime;
+            frameCount++; if (delta >= 1000) {
+                const fps = (frameCount / (delta / 1000)).toFixed(1);
+                fpsDisplay.textContent = `FPS: ${fps}`;
+                frameCount = 0; lastTime = now;
+            }
+        }
+
+        function drawDetections(detections) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            detections.forEach(det => {
+                const [x1, y1, x2, y2] = det.box;
+                const score = (det.score * 100).toFixed(1);
+                const label = `${det.class_name.split(' ')[0]} (${score}%)`;
+                ctx.strokeStyle = '#2ecc71';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                ctx.fillStyle = '#2ecc71';
+                ctx.font = '15px Poppins';
+                const textY = y1 > 20 ? y1 : y2 + 20;
+                ctx.fillRect(x1 - 2, textY - 22, ctx.measureText(label).width + 10, 22);
+                ctx.fillStyle = '#fff';
+                ctx.fillText(label, x1 + 3, textY - 7);
+            });
+        }
+
+        // --- GALERI ---
+        const openGalleryBtn = document.getElementById('openGalleryBtn');
+        const closeGalleryBtn = document.getElementById('closeGalleryBtn');
+        const galleryModal = document.getElementById('galleryModal');
+        const galleryGrid = document.getElementById('galleryGrid');
+
+        const signWords = [
+            { name: "Bantu", src: "/static/asset/bantu.png" },
+            { name: "Bapak", src: "/static/asset/bapak.png" },
+            { name: "Ibu", src: "/static/asset/ibu.png" },
+            { name: "Makan", src: "/static/asset/makan.png" },
+            { name: "Maaf", src: "/static/asset/maaf.png" },
+            { name: "Tidur", src: "/static/asset/tidur.png" },
+            { name: "Tolong", src: "/static/asset/tolong.png" },
+            { name: "Saya", src: "/static/asset/saya.png" },
+            { name: "Sehat", src: "/static/asset/sehat.png" },
+            { name: "rumah", src: "/static/asset/rumah.png" },
+            { name: "kamu", src: "/static/asset/kamu.png" },
+            { name: "Mau", src: "/static/asset/mau.png" }
+        ];
+
+        function renderGallery() {
+            galleryGrid.innerHTML = '';
+            signWords.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+                div.innerHTML = `
+                    <img src="${item.src}" alt="Isyarat ${item.name}">
+                    <div class="gallery-label">${item.name}</div>
+                `;
+                galleryGrid.appendChild(div);
+            });
+        }
+
+        openGalleryBtn.addEventListener('click', () => { renderGallery(); galleryModal.classList.add('show'); });
+        closeGalleryBtn.addEventListener('click', () => { galleryModal.classList.remove('show'); });
+        galleryModal.addEventListener('click', (e) => { if (e.target === galleryModal) galleryModal.classList.remove('show'); });
+    </script>
+</body>
+</html>

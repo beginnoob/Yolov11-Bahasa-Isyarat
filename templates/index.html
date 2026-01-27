@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deteksi Bahasa Isyarat</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #74ABE2, #5563DE);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Efek lingkaran latar belakang */
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.4;
+      animation: float 6s ease-in-out infinite alternate;
+    }
+
+    .circle1 {
+      width: 300px;
+      height: 300px;
+      background: #8e44ad;
+      top: 10%;
+      left: 15%;
+    }
+
+    .circle2 {
+      width: 400px;
+      height: 400px;
+      background: #3498db;
+      bottom: 10%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(20px); }
+    }
+
+    /* Konten utama */
+    .title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      animation: fadeInDown 1s ease forwards;
+    }
+
+    .subtitle {
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #f1f1f1;
+      margin-bottom: 1.5rem;
+      animation: fadeInDown 1.2s ease forwards;
+    }
+
+    .description {
+      max-width: 650px;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #f8f9fa;
+      margin-bottom: 2.5rem;
+      animation: fadeInUp 1.5s ease forwards;
+    }
+
+    /* Tombol CTA */
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      color: white;
+      padding: 15px 45px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 50px;
+      box-shadow: 0 5px 20px rgba(0, 114, 255, 0.4);
+      transition: all 0.3s ease;
+      animation: fadeInUp 1.8s ease forwards;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(0, 114, 255, 0.6);
+    }
+
+    /* Animasi masuk */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsif */
+    @media (max-width: 768px) {
+      .title {
+        font-size: 2.4rem;
+      }
+      .subtitle {
+        font-size: 1.2rem;
+      }
+      .description {
+        font-size: 1rem;
+      }
+      .cta-button {
+        padding: 12px 35px;
+        font-size: 1rem;
+      }
+    }
+
+    /* Footer kecil */
+    footer {
+      position: absolute;
+      bottom: 15px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      animation: fadeInUp 2s ease forwards;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="bg-circle circle1"></div>
+    <div class="bg-circle circle2"></div>
+
+    <h1 class="title">Deteksi Kata Bahasa Isyarat</h1>
+    <h2 class="subtitle">BISINDO dan SIBI</h2>
+    <p class="description">
+      Aplikasi web yang mampu mendeteksi kata dari gerakan tangan Anda menjadi teks secara real-time menggunakan kecerdasan buatan (AI).
+    </p>
+    <a href="/deteksi" class="cta-button">✨ Coba Sekarang</a>
+  </div>
+
+  <footer>
+    © 2025 Deteksi Bahasa Isyarat
+  </footer>
+</body>
+</html>
