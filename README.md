@@ -31,7 +31,6 @@ The main objective of this project is to evaluate the performance of the YOLOv11
   - Special education teachers (SLB)
 - Type: Image dataset
 - Classes: Words in BISINDO & SIBI (e.g., *aku*, *kamu*, *makan*, etc.)
-- Datasets: 
 
 ---
 
