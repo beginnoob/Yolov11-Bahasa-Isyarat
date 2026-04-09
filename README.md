@@ -45,6 +45,15 @@ The main objective of this project is to evaluate the performance of the YOLOv11
 
 ## 🚀 How to Run
 
-1. Clone this repository: git clone https://github.com/beginnoob/Yolov11-Bahasa-Isyarat.git
-2. Install dependencies: pip install -r requirements.txt
-3. Run inference: python app.py
+1. Clone this repository:
+```
+git clone https://github.com/beginnoob/Yolov11-Bahasa-Isyarat.git
+```
+2. Install dependencies:
+```
+pip install -r requirements.txt
+```   
+3. Run inference:
+```
+python app.py
+```
